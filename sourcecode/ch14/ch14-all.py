@@ -87,6 +87,44 @@ def checkOffscreen(x, y):
     return x, y
 
 
+def playersTouching():
+    global pOneX, pOneY, pTwoX, pTwoY
+
+    if -32 < pOneX - pTwoX < 32 and -40 < pOneY - pTwoY < 40:
+        xDiff = pOneX - pTwoX
+        yDiff = pOneY - pTwoY
+
+        for dist in range(int(abs(xDiff) / 2)):
+            pOneMove = leftClear(pOneX, pOneY) + rightClear(pOneX, pOneY)
+            pTwoMove = leftClear(pTwoX, pTwoY) + rightClear(pTwoX, pTwoY)
+            if xDiff > 0:
+                pOneX += pOneMove / 2 * xDiff / xDiff
+                pTwoX -= pTwoMove / 2 * xDiff / xDiff
+            else:
+                pOneX -= pOneMove / 2 * xDiff / xDiff
+                pTwoX += pTwoMove / 2 * xDiff / xDiff
+
+        for dist in range(int(abs(yDiff) / 2)):
+            pOneMove = upClear(pOneX, pOneY) + downClear(pOneX, pOneY)
+            pTwoMove = upClear(pTwoX, pTwoY) + downClear(pTwoX, pTwoY)
+            if yDiff > 0:
+                pOneY += pOneMove / 2 * yDiff / yDiff
+                pTwoY -= pTwoMove / 2 * yDiff / yDiff
+            else:
+                pOneY -= pOneMove / 2 * yDiff / yDiff
+                pTwoY += pTwoMove / 2 * yDiff / yDiff
+                
+
+def touchingCoin(x, y):
+    return -20 < x - coinPos[0] < 20 and -20 < y - coinPos[1] < 20
+
+
+def randomPosition():
+    x = random.randrange(32, windowSize[0] - 52)
+    y = random.randrange(32, windowSize[1] - 52)
+    return x, y
+
+
 windowSize = [640, 384]
 screen = pygame.display.set_mode(windowSize)
 clock = pygame.time.Clock()
@@ -100,7 +138,7 @@ pOneY = int(windowSize[1] / 2)
 pTwoX = int(windowSize[0] / 4) * 3
 pTwoY = int(windowSize[1] / 2)
 
-#coinPos = randomPosition()
+coinPos = randomPosition()
 
 pOnePoints = 0
 pTwoPoints = 0
@@ -206,11 +244,33 @@ while not done:
         pTwoImage = moveAnimation(pTwoMove1, pTwoMove2, pTwoCount)
     else:
         pTwoImage = pTwoStanding
-    
+
+    # Check touching
+    playersTouching()
+
+    # Check touching coin
+    if touchingCoin(pOneX, pOneY):
+        pOnePoints += 1
+        coinSound.play()
+
+    if touchingCoin(pTwoX, pTwoY):
+        pTwoPoints += 1
+        coinSound.play()
+
+    # Move coin if touching
+    if touchingCoin(pOneX, pOneY) or touchingCoin(pTwoX, pTwoY):
+        coinPos = randomPosition()
+
+    # Render points for display
+    pOnePointLabel = pointFont.render(str(pOnePoints), 1, (255, 255, 255))
+    pTwoPointLabel = pointFont.render(str(pTwoPoints), 1, (255, 255, 255))
 
     screen.blit(background, (0, 0))
+    screen.blit(coin, coinPos)
     screen.blit(pOneImage, [pOneX, pOneY])
     screen.blit(pTwoImage, [pTwoX, pTwoY])
+    screen.blit(pOnePointLabel, [pOneX - 9, pOneY - 9])
+    screen.blit(pTwoPointLabel, [pTwoX - 9, pTwoY - 9])
     screen.blit(light, (0, 0))
     
     pygame.display.flip()
@@ -220,7 +280,7 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
             
-    clock.tick(60)
+    clock.tick(72)
     
 pygame.quit()
     
