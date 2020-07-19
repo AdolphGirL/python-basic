@@ -11,6 +11,8 @@
         ".", "o", "*" ...
     markersize: float
     label: 設定圖例名稱，需搭配legend()才有效果
+
+    color linestyle maker，可以一次設定，如g--*
   ```
 - 設定標題  
   - plt.title(圖表標題, (fontsize=點數))
@@ -36,4 +38,13 @@
 - 設定中文字型  
   plt.rcParams['font.sans-serif'] = "Microsoft JhengHei"  
   
-- 設定圖表區 figure
+- 設定圖表區 figure，在沒有特別處理的情況下，matplotlib會自動產生圖表區
+  - 建立圖表區 plt.figure([參數屬性])
+    - figsize，設定方式為串列: [寬、高]，單位為英吋，預設值為[6.4, 4.8]
+    - dip: 解析度，單位唯每英吋的點數
+    - facecolor: 設定背景顏色
+    - edgecolor: 設定邊線顏色
+    - frameon: 是否有邊框，預設為True
+    - tight_layout，這定多個圖表是否有邊界，預設為False
+- 圖表區加上多張圖表
+  - plt.subplot(橫列數, 直欄數, 圖表索引值)
